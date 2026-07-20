@@ -17,6 +17,7 @@ from gpiozero import Button
 from picamera2 import Picamera2, Preview
 import evdev
 from evdev import InputDevice, ecodes
+from ir_filter import set_ir_filter
 
 PHOTO_DIR = os.path.expanduser("~/photos")
 FULL_RES = (3856, 2180)     # IMX585 full sensor readout
@@ -87,6 +88,9 @@ def main():
         main={"size": FULL_RES},
         raw={"size": FULL_RES, "format": "R12"},
     )
+
+    # Enable the built-in IR filter by default  
+    set_ir_filter(enable=True, i2c_bus=4)  # confirm bus number for your wiring
 
     picam2.configure(preview_config)
     # width/height must be passed explicitly, or DrmPreview defaults to 640x480

@@ -33,6 +33,8 @@ pipeline/IPA support for the IMX585 are his work, not this project's:
 - Forked libcamera (IMX585 pipeline/IPA support): https://github.com/will127534/libcamera
 - Forked rpicam-apps: https://github.com/will127534/rpicam-apps
 - IMX585 kernel driver: https://github.com/will127534/imx585-v4l2-driver
+- IR filter control (vendored, refactored): originally
+  https://github.com/will127534/StarlightEye/blob/main/software/IRFilter
 
 MonoPiCam builds and depends on **pinned forks** of these three repos,
 rather than tracking Will's `main` branches directly, so that this guide
@@ -292,7 +294,7 @@ After reboot, the panel should be blank/idle — no console text or cursor.
 ### 2.3 Install app-level Python dependencies
 
 ```
-sudo apt install -y python3-kms++ python3-gpiozero python3-lgpio python3-evdev
+sudo apt install -y python3-kms++ python3-gpiozero python3-lgpio python3-evdev python3-smbus
 ```
 
 - `python3-kms++` (pykms) — required by picamera2's `Preview.DRM` backend.
