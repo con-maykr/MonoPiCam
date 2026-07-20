@@ -17,12 +17,15 @@ from gpiozero import Button
 from picamera2 import Picamera2, Preview
 import evdev
 from evdev import InputDevice, ecodes
+
 from ir_filter import set_ir_filter
 
 PHOTO_DIR = os.path.expanduser("~/photos")
 FULL_RES = (3856, 2180)     # IMX585 full sensor readout
 PREVIEW_RES = (800, 480)    # matches the Waveshare panel's native resolution
 CAPTURE_BUTTON_PIN = 26
+IR_FILTER_I2C_BUS = 4        # confirm against your own wiring (see README)
+IR_FILTER_ENABLED_AT_STARTUP = False
 
 os.makedirs(PHOTO_DIR, exist_ok=True)
 exit_event = threading.Event()
@@ -80,6 +83,12 @@ def capture_still(picam2, still_config, preview_config):
 def main():
     picam2 = Picamera2()
 
+    try:
+        set_ir_filter(IR_FILTER_ENABLED_AT_STARTUP, i2c_bus=IR_FILTER_I2C_BUS)
+        print(f"IR filter {'enabled' if IR_FILTER_ENABLED_AT_STARTUP else 'disabled'} at startup.")
+    except Exception as e:
+        print(f"WARNING: could not set IR filter state ({e}). Continuing without it.")
+
     preview_config = picam2.create_preview_configuration(
         main={"size": PREVIEW_RES, "format": "XRGB8888"},
         raw={"size": (1928, 1090), "format": "R12"},
@@ -88,9 +97,6 @@ def main():
         main={"size": FULL_RES},
         raw={"size": FULL_RES, "format": "R12"},
     )
-
-    # Enable the built-in IR filter by default  
-    set_ir_filter(enable=True, i2c_bus=4)  # confirm bus number for your wiring
 
     picam2.configure(preview_config)
     # width/height must be passed explicitly, or DrmPreview defaults to 640x480
