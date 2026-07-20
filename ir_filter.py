@@ -47,3 +47,20 @@ def _main():
     parser.add_argument("--enable", dest="enable", action="store_true",
                          help="Enable the IR filter")
     parser.add_argument("--disable", dest="enable", action="store_false",
+                         help="Disable the IR filter")
+    parser.set_defaults(enable=None)
+    parser.add_argument("--i2c-bus", type=int, default=DEFAULT_I2C_BUS,
+                         help=f"I2C bus (default: {DEFAULT_I2C_BUS})")
+    parser.add_argument("--i2c-address", type=lambda x: int(x, 0), default=DEFAULT_I2C_ADDRESS,
+                         help=f"I2C address in hex (default: {hex(DEFAULT_I2C_ADDRESS)})")
+    args = parser.parse_args()
+
+    if args.enable is None:
+        parser.error("one of --enable or --disable is required")
+
+    set_ir_filter(args.enable, args.i2c_bus, args.i2c_address)
+    print(f"IR Filter {'enabled' if args.enable else 'disabled'}.")
+
+
+if __name__ == "__main__":
+    _main()
