@@ -1,0 +1,31 @@
+[Unit]
+Description=StarlightEye Mono Photo Capture (mpc.py) - live preview + capture
+# Must come up after the fbcon-unbind service, or mpc.py will fail to
+# acquire DRM master on the DSI display (see post-quickstart README).
+After=multi-user.target unbind-fbcon.service
+Requires=unbind-fbcon.service
+Wants=network-online.target
+
+[Service]
+Type=simple
+User=pi
+Group=pi
+WorkingDirectory=/home/pi/monopicam
+
+# Ensures the custom-built libcamera (not apt's copy) resolves correctly.
+# systemd services do not source ~/.bashrc, so this must be set explicitly
+# here even though it's also exported there for interactive shells.
+Environment=PYTHONPATH=/usr/local/lib/python3/dist-packages
+
+ExecStart=/usr/bin/python3 /home/pi/monopicam/mpc.py
+
+# Restart unconditionally 5 seconds after the process exits, whether it
+# exited cleanly (tap-to-exit), crashed, or was killed.
+Restart=always
+RestartSec=5
+
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
