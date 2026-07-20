@@ -1,34 +1,49 @@
-#!/usr/bin/env python
+"""
+ir_filter.py — controls the StarlightEye's built-in IR-cut filter switch.
+
+Vendored and refactored from Will Whang's original IRFilter script:
+https://github.com/will127534/StarlightEye/blob/main/software/IRFilter
+(StarlightEye project, MIT License)
+
+Original behavior preserved: the filter switch is a CH32V003 acting as an
+I2C device at address 0x34 (shared I2C bus with the CMOS sensor). Writing
+0x01 enables the IR filter, 0x00 disables it.
+
+Changes from the original:
+- Refactored into an importable function (`set_ir_filter`) so it can be
+  called directly from mpc.py, in addition to a standalone CLI entry point
+  preserving the original --enable/--disable/--i2c-bus/--i2c-address flags.
+- Bus/address are parameterized with defaults read from this file's
+  constants rather than hardcoded, so mpc.py and the CLI share one source
+  of truth.
+
+IMPORTANT: confirm your actual I2C bus number before relying on the
+default below — it depends on which CAM/DISP port the StarlightEye is
+physically connected to. See MonoPiCam's README for the detection command.
+"""
+
 import argparse
 import smbus
 
-# Set up the argument parser
-parser = argparse.ArgumentParser(description='I2C communication script')
+DEFAULT_I2C_BUS = 4        # confirm against your own wiring - see README
+DEFAULT_I2C_ADDRESS = 0x34
 
-# Add arguments
-parser.add_argument('--enable', dest='write', action='store_const', const=0, default=0,
-                    help='Enable IR Filter (set to 0)')
-parser.add_argument('--disable', dest='write', action='store_const', const=1,
-                    help='Disable IR Filter (set to 1)')
-parser.add_argument('--i2c-bus', type=int, default=4,
-                    help='I2C bus (default: 4)')
-parser.add_argument('--i2c-address', type=lambda x: int(x,0), default=0x34,
-                    help='I2C address in hexadecimal (default: 0x34)')
 
-# Parse arguments
-args = parser.parse_args()
+def set_ir_filter(enable: bool, i2c_bus: int = DEFAULT_I2C_BUS,
+                   i2c_address: int = DEFAULT_I2C_ADDRESS) -> None:
+    """Enable or disable the StarlightEye's IR-cut filter.
 
-# Assign arguments to variables
-i2c_ch = args.i2c_bus
-i2c_address = args.i2c_address
-write_mode = args.write
+    Args:
+        enable: True to enable (engage) the IR filter, False to disable it.
+        i2c_bus: I2C bus number the StarlightEye is wired to.
+        i2c_address: I2C address of the filter switch (default 0x34).
+    """
+    bus = smbus.SMBus(i2c_bus)
+    bus.write_byte(i2c_address, 0x01 if enable else 0x00)
 
-# Initialize I2C
-bus = smbus.SMBus(i2c_ch)
 
-if write_mode == 0:
-    bus.write_byte(i2c_address, 0x01)
-    print("IR Filter enabled.")
-elif write_mode == 1:
-    bus.write_byte(i2c_address, 0x00)
-    print("IR Filter disabled.")
+def _main():
+    parser = argparse.ArgumentParser(description="StarlightEye IR filter control")
+    parser.add_argument("--enable", dest="enable", action="store_true",
+                         help="Enable the IR filter")
+    parser.add_argument("--disable", dest="enable", action="store_false",
