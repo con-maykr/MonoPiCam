@@ -40,9 +40,9 @@ MonoPiCam builds and depends on **pinned forks** of these three repos,
 rather than tracking Will's `main` branches directly, so that this guide
 stays reproducible even as his upstream repos continue to evolve:
 
-- https://github.com/\<you\>/monopicam-libcamera (tag `monopicam-v1`)
-- https://github.com/\<you\>/monopicam-rpicam-apps (tag `monopicam-v1`)
-- https://github.com/\<you\>/monopicam-imx585-driver (tag `monopicam-v1`)
+- https://github.com/con-maykr/monopicam-libcamera (tag `monopicam-v1`)
+- https://github.com/con-maykr/monopicam-rpicam-apps (tag `monopicam-v1`)
+- https://github.com/con-maykr/monopicam-imx585-driver (tag `monopicam-v1`)
 
 All three retain Will's original MIT license and commit history in full.
 If you find or fix a bug in the driver/pipeline layer, please consider
